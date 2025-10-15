@@ -1,0 +1,7 @@
+results/
+logs/
+*.o
+*.e
+*.out
+*.err
+.DS_Store
