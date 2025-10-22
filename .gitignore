@@ -11,3 +11,19 @@ logs/
 !results/**/plots/*.pdf
 !results/**/figures/*.png
 !results/**/figures/*.pdf
+
+# --- allowlist figures under results/ (keep everything else ignored) ---
+# Ignore everything under results by default
+results/*
+
+# Re-include directories so negations below can take effect
+!results/**/
+
+# Allow figures and plots (png/pdf)
+!results/figures/
+!results/figures/*.png
+!results/figures/*.pdf
+!results/**/plots/
+!results/**/plots/*.png
+!results/**/plots/*.pdf
+# --- end allowlist ---
