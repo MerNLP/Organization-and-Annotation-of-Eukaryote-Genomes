@@ -5,3 +5,9 @@ logs/
 *.out
 *.err
 .DS_Store
+
+# Track only figures in results/
+!results/**/plots/*.png
+!results/**/plots/*.pdf
+!results/**/figures/*.png
+!results/**/figures/*.pdf
