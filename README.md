@@ -11,6 +11,9 @@ SLURM job scripts for each analysis step.
 **results/**  
 Summaries of analysis results.
 
+**reports/**  
+Biological interpretation and summaries.
+
 **.gitignore**  
 Ensures large raw data, logs, and intermediate files are not pushed to GitHub.
 
