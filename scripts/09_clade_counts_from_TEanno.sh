@@ -26,7 +26,6 @@ for f in "$GFF" "$COP" "$GYP"; do
 done
 
 # --- build TE -> Clade map from TEsorter (Copia + Gypsy) ---
-# Splits on '#' and strips trailing _INT so IDs match EDTA names.
 awk -F'\t' '
   BEGIN{OFS="\t"}
   NR==FNR {
@@ -46,9 +45,7 @@ awk -F'\t' '
     if(cl=="") cl="Unclassified"
     map[te]=cl
   }
-  END{
-    for(k in map) print k, map[k]
-  }
+  END{ for(k in map) print k, map[k] }
 ' "$COP" "$GYP" \
 | sort -u > "${TS_OUT}/TE_to_Clade.map.tsv"
 
@@ -60,26 +57,32 @@ awk -v MAP="${TS_OUT}/TE_to_Clade.map.tsv" '
     close(MAP)
     print "Superfamily","Clade","Count"
   }
-  $0 ~ /^#/ { next }                  # skip comments
+  $0 ~ /^#/ { next }  # skip comments
   NF>=9 {
     type=$3; attrs=$9
-    if(type!="transposable_element" && type!="repeat_region") next
 
-    # Extract Superfamily
+    # accept more feature types
+    if (type!="transposable_element" && type!="repeat_region" && type!="LTR_retrotransposon") next
+
+    # Superfamily from Superfamily= or derive from Classification=
     sf=""
-    if (match(attrs, /(^|;)Superfamily=[^;]+/, m)) { sf=m[0]; sub(/(^|;)Superfamily=/,"",sf) }
-
-    # Only Copia/Gypsy as per assignment
+    if (match(attrs, /(^|;)Superfamily=[^;]+/, m)){ sf=m[0]; sub(/(^|;)Superfamily=/,"",sf) }
+    if (sf=="") {
+      cls=""
+      if (match(attrs, /(^|;)Classification=[^;]+/, c)){ cls=c[0]; sub(/(^|;)Classification=/,"",cls) }
+      # Derive superfamily from common tokens
+      if (cls ~ /(^|[^A-Za-z])(Copia|RLC)([^A-Za-z]|$)/i) sf="Copia"
+      else if (cls ~ /(^|[^A-Za-z])(Gypsy|RLG)([^A-Za-z]|$)/i) sf="Gypsy"
+    }
     if (sf!="Copia" && sf!="Gypsy") next
 
-    # Extract a TE name to match the library/TEsorter
+    # TE name from Name= (fallback Target= / Classification=)
     name=""
-    if (match(attrs, /(^|;)Name=[^;]+/, n))   { name=n[0]; sub(/(^|;)Name=/,"",name) }
+    if (match(attrs, /(^|;)Name=[^;]+/, n)) { name=n[0]; sub(/(^|;)Name=/,"",name) }
     if (name=="") {
       if (match(attrs, /(^|;)Target=[^;]+/, t)) { name=t[0]; sub(/(^|;)Target=/,"",name) }
-      else if (match(attrs, /(^|;)Classification=[^;]+/, c)) { name=c[0]; sub(/(^|;)Classification=/,"",name) }
+      else if (match(attrs, /(^|;)Classification=[^;]+/, c2)) { name=c2[0]; sub(/(^|;)Classification=/,"",name) }
     }
-    # Normalize name: drop coordinates and TE part suffixes
     sub(/:.*/,"",name)
     sub(/_LTR$/,"",name); sub(/_INT$/,"",name)
 
@@ -97,7 +100,11 @@ awk -v MAP="${TS_OUT}/TE_to_Clade.map.tsv" '
 | sort -t $'\t' -k1,1 -k3,3nr > "$OUT"
 
 echo "[OK] Wrote: $OUT"
-column -t -s $'\t' "$OUT" | sed -n '1,200p' || true
+lines=$(wc -l < "$OUT" || echo 0)
+if [[ "$lines" -le 1 ]]; then
+  echo "[WARN] No Copia/Gypsy elements found after parsing TEanno; skipping plot."
+  exit 0
+fi
 
 # --- plot (headless-safe) ---
 export R_LIBS_USER="${WORKDIR}/.Rlib"
@@ -117,6 +124,11 @@ ts_out  <- file.path(workdir, "results/TEsorter_all")
 figdir  <- file.path(workdir, "results/figures")
 
 tab <- fread(file.path(ts_out, "Copia_Gypsy_clade_counts_from_TEanno.tsv"), sep="\t", header=TRUE)
+if (nrow(tab) == 0L) {
+  cat("[WARN] Empty table; not plotting.\n")
+  q(save="no")  # exit cleanly
+}
+
 setnames(tab, c("Superfamily","Clade","Count"))
 tab[is.na(Clade) | Clade=="", Clade := "Unclassified"]
 
