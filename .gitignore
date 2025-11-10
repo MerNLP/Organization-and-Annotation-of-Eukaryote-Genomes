@@ -1,29 +1,27 @@
-results/
+cat >> .gitignore <<'EOF'
+# build / job outputs
 logs/
-*.o
-*.e
-*.out
+*.log
 *.err
-.DS_Store
+*.out
 
-# Track only figures in results/
-!results/**/plots/*.png
-!results/**/plots/*.pdf
-!results/**/figures/*.png
-!results/**/figures/*.pdf
-
-# --- allowlist figures under results/ (keep everything else ignored) ---
-# Ignore everything under results by default
+# heavy analysis outputs
+maker/
 results/*
-
-# Re-include directories so negations below can take effect
-!results/**/
-
-# Allow figures and plots (png/pdf)
 !results/figures/
-!results/figures/*.png
-!results/figures/*.pdf
-!results/**/plots/
-!results/**/plots/*.png
-!results/**/plots/*.pdf
-# --- end allowlist ---
+results/tmp/
+busco_*/
+busco_downloads/
+containers/
+container/
+*.sif
+
+# R/Python caches
+.Rlib/
+.Rhistory
+.Rproj.user/
+__pycache__/
+*.RData
+EOF
+
+git add .gitignore
