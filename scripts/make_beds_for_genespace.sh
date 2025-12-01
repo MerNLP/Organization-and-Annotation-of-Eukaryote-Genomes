@@ -11,7 +11,6 @@
 
 set -euo pipefail
 
-# === Paths (edit if yours differ) ===
 WORKDIR="/data/users/mlawrence/eukaryote_genome_annotation"
 GSDIR="$WORKDIR/genespace_input"
 BEDDIR="$GSDIR/bed"
@@ -32,7 +31,7 @@ else
   echo "[WARN] TAIR10.bed not found at $TAIR_BED (not fatal if you’ll add later)."
 fi
 
-# 1) Your accession (Athaliana) — only build if missing
+
 if [[ -s "$ATH_BED" ]]; then
   echo "[SKIP] $ATH_BED already exists"
 else
@@ -45,7 +44,7 @@ else
   echo "[DONE] $ATH_BED"
 fi
 
-# 2) Course accessions (Altai-5, Are-6, Est-0, Etna-2, Ice-1, Kar-1, Taz-0)
+
 shopt -s nullglob
 for gff in "$GFFDIR"/*.gff; do
   base=$(basename "$gff" .EVM.v3.5.ann.protein_coding_genes.gff)
@@ -66,4 +65,4 @@ shopt -u nullglob
 echo "=== BEDs present in $BEDDIR ==="
 ls -lh "$BEDDIR" || true
 
-echo "[ALL GOOD] BED generation finished."
+echo "BED generation finished."
