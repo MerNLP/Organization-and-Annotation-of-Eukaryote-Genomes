@@ -1,203 +1,181 @@
-#Week 3–4 Summary: Gene Structure Annotation & Functional Annotation (MAKER + BLAST + InterProScan)#
+# **Week 3–4 Summary: Gene Structure Annotation & Functional Annotation (MAKER + BLAST + InterProScan)**
 
-Course: Organization and Annotation of Eukaryote Genomes
-Organism: Arabidopsis thaliana (Kar-1 accession)
-Assembly used: hifiasm.p_ctg.fa
-Annotation pipeline: MAKER → Filtering → Functional annotation
+**Course:** Organization and Annotation of Eukaryote Genomes
+**Organism:** *Arabidopsis thaliana* (Kar-1 accession)
+**Assembly used:** `hifiasm.p_ctg.fa`
+**Annotation pipeline:** MAKER → Filtering → Functional annotation
 
 This report describes:
 
-Structural gene annotation using MAKER
+* Structural gene annotation using MAKER
+* Filtering of predicted gene models
+* Assessment of annotation quality using BUSCO
+* Functional annotation with BLAST and InterProScan
+* Key interpretation questions about gene completeness and annotation quality
 
-Filtering of predicted gene models
+Figures referenced (already included in the final report):
 
-Assessment of annotation quality using BUSCO
+* `maker_annotation_stats` (gene counts)
+* BUSCO summary
+* Gene–TE density comparison (100 kb windows)
 
-Functional annotation with BLAST and InterProScan
+---
 
-Key interpretation questions about gene completeness and annotation quality
+## **1. Structural Gene Annotation (MAKER)**
 
-Figures referenced (already in your final report):
+MAKER was run on the TE-masked genome using both evidence-based and ab-initio prediction.
 
-maker_annotation_stats (gene counts)
+**Inputs:**
 
-BUSCO summary
+* Repeat-masked genome (`.mod.fa`)
+* Protein evidence (UniProt)
+* Transcript evidence (TAIR10 cDNAs)
+* SNAP + AUGUSTUS gene predictors trained on the Kar-1 genome
 
-Gene–TE density comparison (100 kb windows)
+**Outputs:**
 
-1. Structural Gene Annotation (MAKER)
+* `maker.gff3` — all predicted gene models
+* `maker.proteins.fasta` — predicted proteins
+* `maker.transcripts.fasta` — predicted transcripts
 
-MAKER was run on the TE-masked genome using evidence-based + ab-initio prediction:
+**Total raw gene models:** **33,529**
 
-Inputs:
+### **Guiding question: Why is the number of initial gene models so high?**
 
-Repeat-masked genome (.mod.fa)
+Because MAKER reports **all** potential gene models before filtering out:
 
-Protein evidence (UniProt)
+* short ORFs
+* TE-derived genes
+* incomplete predictions
+* models overlapping repeats
 
-Transcript evidence (TAIR10 cDNAs)
+High initial counts are expected for a plant genome with moderate TE load.
 
-SNAP + AUGUSTUS trained on the Kar-1 genome
+---
 
-Outputs:
+## **2. Filtering of Gene Models**
 
-maker.gff3 → all predicted gene models
+After filtering based on AED score, protein length, and structural completeness:
 
-maker.proteins.fasta → predicted protein sequences
+* **Final filtered genes:** **33,529**
 
-maker.transcripts.fasta → transcript models
+(Filtering removes TE-derived or low-quality predictions from downstream analysis, but the structural counts stay the same in this dataset.)
 
-MAKER produced 33,529 raw gene models for Kar-1.
-
-Guiding question: Why is the number of initial gene models so high?
-
-Because MAKER produces all possible models before filtering out:
-
-short ORFs
-
-TE-derived genes
-
-incomplete models
-
-fragments overlapping repeats
-
-High initial counts are normal for TE-rich plant genomes.
-
-2. Filtering of Gene Models
-
-After filtering based on AED score, protein length, and completeness:
-
-Final filtered genes: 33,529
-
-(This value remains the same here because filtering removed TE-derived sequences from downstream analyses, but the total number of structural models stays in the file.)
-
-Guiding question: Why can filtered genes > genes with BLAST hits?
+### **Guiding question: Why can filtered genes > genes with BLAST hits?**
 
 Because:
 
-"filtered genes" = all structurally valid gene models
+* **Filtered genes** = all structurally valid gene models
+* **BLAST-hit genes** = only those with sequence similarity to known proteins
 
-"genes with BLAST hits" = only those that match reference proteins
+Some valid genes may be:
 
-Some valid genes are:
-
-species-specific
-
-uncharacterized
-
-too short for BLAST
-
-real genes without homologs in TAIR10/UniProt
+* species-specific
+* too diverged to match TAIR10/UniProt
+* too short for BLAST
+* uncharacterized but still real
 
 So filtered > BLAST hits is normal.
 
-3. BUSCO Assessment (Annotation Completeness)
+---
 
-BUSCO run with the eudicots_odb10 lineage on MAKER proteins gave:
+## **3. BUSCO Assessment (Annotation Completeness)**
 
-Complete BUSCOs:       77.8%
-Single-copy BUSCOs:    68.8% 
-Duplicated BUSCOs:     9.0% 
-Fragmented BUSCOs:     0.4% 
-Missing BUSCOs:        21.8%
+BUSCO (eudicots_odb10) run on MAKER proteins produced:
 
+| Category               | Value     |
+| ---------------------- | --------- |
+| **Complete BUSCOs**    | **77.8%** |
+| **Single-copy BUSCOs** | **68.8%** |
+| **Duplicated BUSCOs**  | **9.0%**  |
+| **Fragmented BUSCOs**  | **0.4%**  |
+| **Missing BUSCOs**     | **21.8%** |
 
-Guiding question: What does “good genome but bad annotation” mean?
+### **Guiding question: What does “good genome but bad annotation” mean?**
 
-A genome can have:
+It means:
 
-high BUSCO completeness from assembly
+* The assembly BUSCO score is high
+* But annotation BUSCO score is lower
 
-but low BUSCO completeness from annotation
+This can happen when:
 
-This happens if:
+* Gene predictors underperform
+* TE-masking removed real exons
+* Protein evidence is limited
+* AUGUSTUS/SNAP need better training
 
-gene predictors underperform
+### **How to improve annotation completeness?**
 
-TE masking removed real exons
+* Improve TE masking
+* Retrain gene predictors
+* Add RNA-seq evidence
+* Adjust filtering thresholds
 
-protein evidence is incomplete
+---
 
-AUGUSTUS/SNAP not trained well
+## **4. Functional Annotation (BLAST + InterProScan)**
 
-How to improve annotation completeness?
+Performed using BLASTP against:
 
-Improve TE masking (remove false positives)
+* **TAIR10**
+* **UniProt**
 
-Retrain gene predictors
+**Results:**
 
-Add more transcript evidence (RNA-seq)
+* **Genes with TAIR10 hits:** 40,800
+* **Genes with UniProt hits:** 35,078
+* **Genes without BLAST hits:**
 
-Improve filtering thresholds
-
-4. Functional Annotation (BLAST + InterProScan)
-
-BLASTP against:
-
-TAIR10
-
-UniProt
-
-Results:
-
-Genes with TAIR10 hits: 40,800
-
-Genes with UniProt hits: 35,078
-
-Genes without BLAST hits: TAIR10 = 1,905 ; UniProt = 7,627
+  * TAIR10: 1,905
+  * UniProt: 7,627
 
 InterProScan added:
 
-Protein domains
+* Protein domains
+* PFAM annotations
+* GO terms
 
-GO terms
+### **Guiding question: What does it mean if a gene has NO BLAST hit but DOES have InterPro domains?**
 
-PFAM annotations
+It likely represents a **real functional gene** that:
 
-Guiding question: What does it mean if a gene has NO BLAST hit but DOES have InterPro domains?
+* retains conserved protein motifs
+* but has diverged too much to match known proteins at the sequence level
 
-It likely represents:
+This is common in plant gene families.
 
-a valid functional gene
+---
 
-with conserved protein motifs
+## **5. Gene vs TE Density (100 kb Windows)**
 
-but diverged sequence-level similarity
+Kar-1 shows the classical plant genome pattern:
 
-This is common in plants.
-
-5. Gene vs TE Density (100 kb Windows)
-
-Kar-1 shows the expected plant genome pattern:
-
-High TE density → low gene density
-
-High gene density → low TE density
+* **High TE density → low gene density**
+* **High gene density → low TE density**
 
 This reflects:
 
-TE accumulation in pericentromeric/heterochromatic regions
+* TE enrichment in heterochromatic/pericentromeric regions
+* Gene enrichment in euchromatic chromosome arms
 
-Gene enrichment in euchromatic chromosome arms
-
-Guiding question: Why does TE density influence annotation quality?
+### **Guiding question: Why does TE density influence annotation quality?**
 
 Because:
 
-TE-rich regions cause fragmented gene predictions
+* TEs cause fragmented or ambiguous gene predictions
+* MAKER struggles in repeat-rich regions
+* More missing or incomplete annotations occur where TE density is high
 
-Genes inside/near repeats are harder for MAKER to reconstruct
+---
 
-Annotation missingness correlates with TE hotspots
+## **Summary (Week 3–4)**
 
-Summary (Week 3–4)
+* MAKER predicted **33,529** gene models for Kar-1.
+* Annotation is uneven across the genome due to TE-rich regions.
+* BUSCO highlights missing or incomplete genes.
+* Most genes have TAIR10/UniProt homologs, while others are accession-specific or highly diverged.
+* Gene density shows a clear inverse relationship with TE density, explaining variable annotation performance.
 
-MAKER produced 33,529 gene models for Kar-1.
+---
 
-TE-rich regions show lower annotation performance.
-
-BUSCO confirms annotation quality and highlights possible missing genes.
-
-Functional annotation shows most genes have homologs in TAIR10/UniProt, but a subset is accession-specific.
-
-Gene density is inversely correlated with TE density, explaining uneven annotation completeness in the genome.
