@@ -16,7 +16,7 @@ WORKDIR="/data/users/mlawrence/eukaryote_genome_annotation"
 FINAL="$WORKDIR/maker/final"
 BEST="$WORKDIR/results/uniprot/maker_vs_uniprot.stitle.best.tsv"
 
-# --- input checks ---
+# input checks 
 [[ -s "$BEST" ]] || { echo "[ERR] Missing $BEST (run 20b_uniprot_blast_with_titles.sh first)"; exit 2; }
 
 GFF_IN="$FINAL/assembly.all.maker.noseq.renamed.gff"
@@ -28,11 +28,11 @@ echo "[INFO] Input GFF : $GFF_IN"
 echo "[INFO] Output GFF: $GFF_OUT"
 echo "[INFO] UniProt hits: $BEST"
 
-# --- build qid→acc,title map ---
+# build qid→acc,title map 
 awk -F'\t' 'BEGIN{OFS="\t"}{print $1,$2,$3}' "$BEST" > "$BEST.map"
 echo "[INFO] Map lines: $(wc -l < "$BEST.map")"
 
-# --- annotate mRNA features ---
+# annotate mRNA features 
 awk -v MAP="$BEST.map" -F'\t' '
 BEGIN{
   OFS="\t";
