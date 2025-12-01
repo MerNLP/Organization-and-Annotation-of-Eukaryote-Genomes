@@ -28,7 +28,7 @@ awk 'BEGIN{OFS="\t"}{
   print $1, $4-1, $5, b[2]
 }' > "$BED"
 
-# 2) Peptide FASTA (your proteome)
+# 2) Peptide FASTA 
 cp "$FINAL/proteins.renamed.fasta.Uniprot" "$GSDIR/peptide/Athaliana.fa"
 
 echo "[DONE] BED: $BED"
