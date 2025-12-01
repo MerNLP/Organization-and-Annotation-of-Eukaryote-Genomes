@@ -17,9 +17,6 @@ echo "=== Building longest-per-gene Athaliana FASTA for GENESPACE ==="
 echo "[IN ] $IN"
 echo "[OUT] $OUT"
 
-# If your cluster needs a Python module, uncomment and adjust:
-# module load Python/3.11.3-gompi-2023a
-
 python3 - "$IN" "$OUT" << 'PY'
 import sys
 
