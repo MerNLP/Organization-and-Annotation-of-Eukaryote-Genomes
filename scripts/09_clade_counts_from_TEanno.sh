@@ -8,7 +8,6 @@
 #SBATCH --error=/data/users/mlawrence/eukaryote_genome_annotation/logs/clade_from_TEanno_%j.e
 set -euo pipefail
 
-# --- paths ---
 WORKDIR="/data/users/mlawrence/eukaryote_genome_annotation"
 EDTA_OUT="${WORKDIR}/results/EDTA_annotation"
 TS_OUT="${WORKDIR}/results/TEsorter_all"
@@ -20,12 +19,11 @@ COP="${TS_OUT}/Copia_sequences.fa.rexdb-plant.cls.tsv"
 GYP="${TS_OUT}/Gypsy_sequences.fa.rexdb-plant.cls.tsv"
 OUT="${TS_OUT}/Copia_Gypsy_clade_counts_from_TEanno.tsv"
 
-# --- checks ---
 for f in "$GFF" "$COP" "$GYP"; do
   [[ -s "$f" ]] || { echo "[ERR] Missing file: $f" >&2; exit 1; }
 done
 
-# --- build TE -> Clade map from TEsorter (Copia + Gypsy) ---
+# build TE -> Clade map from TEsorter (Copia + Gypsy)
 awk -F'\t' '
   BEGIN{OFS="\t"}
   NR==FNR {
@@ -49,7 +47,7 @@ awk -F'\t' '
 ' "$COP" "$GYP" \
 | sort -u > "${TS_OUT}/TE_to_Clade.map.tsv"
 
-# --- join map to final TEanno and count elements per clade for Copia/Gypsy ---
+#join map to final TEanno and count elements per clade for Copia/Gypsy
 awk -v MAP="${TS_OUT}/TE_to_Clade.map.tsv" '
   BEGIN{
     FS=OFS="\t"
