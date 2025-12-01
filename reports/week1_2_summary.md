@@ -1,4 +1,4 @@
-# Week 1–2 Summary – Transposable Element (TE) Annotation, Classification, and Dynamics
+# Week 1–2 Summary: Transposable Element (TE) Annotation, Classification, and Dynamics
 
 Course: Organization and Annotation of Eukaryote Genomes  
 Organism: Arabidopsis thaliana (accession-level assembly)  
