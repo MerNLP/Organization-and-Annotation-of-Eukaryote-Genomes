@@ -18,10 +18,10 @@ OUTDIR="$WORKDIR/orthofinder_results"
 
 mkdir -p "$OUTDIR"
 
-# --- Load OrthoFinder module ---
+# Load OrthoFinder module
 module load OrthoFinder/2.5.5-foss-2021a
 
-# --- Run OrthoFinder ---
+# Run OrthoFinder
 orthofinder -f "$ORTHO_DIR" -t 20 -a 20 -M msa -A mafft -T fasttree -S diamond -o "$OUTDIR"
 
 echo "[DONE] OrthoFinder completed."
