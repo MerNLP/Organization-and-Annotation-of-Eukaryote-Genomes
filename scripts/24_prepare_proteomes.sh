@@ -19,16 +19,15 @@ TAIR10="/data/courses/assembly-annotation-course/CDS_annotation/data/TAIR10.fa"
 
 mkdir -p "$ORTHO_DIR"
 
-# 1) Your own proteome
+
 cp "$WORKDIR/maker/final/proteins.renamed.fasta.Uniprot" "$ORTHO_DIR/Athaliana.faa"
 
-# 2) Course accessions (ignore .bak files)
+
 for f in "$SRC"/*.protein.faa; do
     base=$(basename "$f")
     cp "$f" "$ORTHO_DIR/$base"
 done
 
-# 3) TAIR10 reference (if available)
 if [[ -s "$TAIR10" ]]; then
     cp "$TAIR10" "$ORTHO_DIR/"
 fi
